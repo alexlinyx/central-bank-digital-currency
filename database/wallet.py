@@ -30,11 +30,11 @@ def transact(sender, receipient, amount):
 
 def lock(wallet1, wallet2):
     if wallet1.id<wallet2.id:
-        wallet1.lock.acuire()
-        wallet2.lock.acuire()
+        wallet1.lock.acquire()
+        wallet2.lock.acquire()
     else:
-        wallet2.lock.acuire()
-        wallet1.lock.acuire()
+        wallet2.lock.acquire()
+        wallet1.lock.acquire()
 
 
 def unlock(wallet1, wallet2):
