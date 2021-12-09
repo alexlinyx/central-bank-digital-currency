@@ -1,2 +1,0 @@
-ellipticpy
-mysql-connector-python
