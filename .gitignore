@@ -26,4 +26,6 @@ hs_err_pid*
 *.pyc
 *.DS_Store
 
-*.txt
+keys.txt
+*.ipynb_checkpoints
+

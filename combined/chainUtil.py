@@ -2,6 +2,7 @@ from hashlib import sha256
 from uuid import uuid1
 from ecdsa import SigningKey, SECP256k1, BadSignatureError
 import pickle
+import json
 
 def generateID():
   return uuid1()
