@@ -1,6 +1,7 @@
 import chainUtil
 from datetime import datetime
 import database
+import pickle
 import boto3
 from boto3.dynamodb.conditions import Key
 

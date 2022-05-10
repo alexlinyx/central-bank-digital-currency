@@ -2,6 +2,7 @@ import boto3
 import json
 from boto3.dynamodb.conditions import Key
 import block
+import pickle
 
 
 def cleanup():
@@ -67,7 +68,7 @@ def main():
     #         }
     #     )
     table = dynamodb.Table('wallets')    
-    table.put_item(Item={'address':'4', 'amount':50, 'random':block.genesis().jsonify()})
+    table.put_item(Item={'address':'4', 'amount':50, 'random':pickle.dumps(block.genesis())})
     table.update_item(Key={'address':'4'}, UpdateExpression="set amount = :g", 
             ExpressionAttributeValues={
                 ':g': 60

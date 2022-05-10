@@ -30,3 +30,9 @@ def verify(sk, data, signature):
     return vk.verify(dataHash, signature)
   except BadSignatureError:
     return False
+
+def serialize(data):
+  return pickle.dumps(data)
+
+def deserialize(data):
+  return pickle.loads(data)
