@@ -1,31 +1,26 @@
 import boto3
 import json
 from boto3.dynamodb.conditions import Key
+import block
 
-def create_table(tablename, keyname, database, capacity=1):
-    table = database.create_table(
-        TableName=tablename,
-        KeySchema=[
-            {
-                'AttributeName': keyname,
-                'KeyType': 'HASH'
-            }
-        ],
-        AttributeDefinitions=[
-            {
-                'AttributeName': keyname,
-                'AttributeType': 'S'
-            }
-        ],
-        ProvisionedThroughput={
-            'ReadCapacityUnits': capacity,
-            'WriteCapacityUnits': capacity
-        }
-    )
-    return table
 
 def cleanup():
     pass
+
+def get_item():
+    dynamodb = boto3.resource('dynamodb')
+    
+    table = dynamodb.Table('wallets')      
+    
+    resp = table.get_item(
+            region='us-east-1',
+            Key={
+                'address' : 1,
+            }
+        )
+    
+    if 'Item' in resp:
+        print(resp['Item'])
 
 def main():
     try:
@@ -52,9 +47,43 @@ def main():
         )
     #ddb_exceptions = client.exceptions
 
-    #wallet_table = create_table('wallets', 'address', dynamodb)
-    client.put_item(TableName='wallets', Item={'address':{'S':'1'}})
-    client.update_item(TableName='wallets', Item={'address':{'S':'2'}})
+    # table = dynamodb.create_table(
+    #         TableName='wallets',
+    #         KeySchema=[
+    #             {
+    #                 'AttributeName': 'address',
+    #                 'KeyType': 'HASH'
+    #             }
+    #         ],
+    #         AttributeDefinitions=[
+    #             {
+    #                 'AttributeName': 'address',
+    #                 'AttributeType': 'S'
+    #             }
+    #         ],
+    #         ProvisionedThroughput={
+    #             'ReadCapacityUnits': 1,
+    #             'WriteCapacityUnits': 1
+    #         }
+    #     )
+    table = dynamodb.Table('wallets')    
+    table.put_item(Item={'address':'4', 'amount':50, 'random':block.genesis().jsonify()})
+    table.update_item(Key={'address':'4'}, UpdateExpression="set amount = :g", 
+            ExpressionAttributeValues={
+                ':g': 60
+            })
+    resp = table.get_item(Key={'address':'4'})
+    
+    if 'Item' in resp:
+        print(resp['Item']['amount'])
+
+    resp = table.scan(ProjectionExpression="address")
+    for i in resp['Items']:
+        table.delete_item(Key=i)
+    #client.put_item(TableName='wallets', Item={'address':'hi', 'amount':0})
+    #client.update_item(TableName='wallets', Item={'address':{'S':'2'}})
+    #table.delete()
+    
 
 
 if __name__ == '__main__':

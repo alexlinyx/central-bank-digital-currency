@@ -9,6 +9,9 @@ class Block:
         self.data = data
         self.hash = hash
 
+    def jsonify(self):
+        return {'Timestamp':self.timestamp, 'LastHash':self.lastHash, 'Data':self.data, 'Hash':self.hash}
+
 def genesis():
     return Block(0, "gensisLastHash", Transaction(), "genesisHash")
     

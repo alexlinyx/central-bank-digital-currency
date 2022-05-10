@@ -1,5 +1,6 @@
 import chainUtil
 from datetime import datetime
+import wallet
 
 class Transaction:
     def __init__(self):
@@ -7,27 +8,29 @@ class Transaction:
         self.input = None #{"timestamp": None, "amount": 0, "address": None, "signature": None }
         self.outputs = []
 
-def newTransaction(senderWallet, recipientWallet, amount):
-    if senderWallet.id==recipientWallet.id:
+def newTransaction(senderID, recipientID, amount):
+    if senderID==recipientID:
         return
 
-    if amount > senderWallet.balance:
-        print(f"Amount {amount} exceeds balance {senderWallet.balance}")
+    sender_balance = wallet.getBalance(senderID)
+    if amount > sender_balance:
+        print(f"Amount {amount} exceeds balance {sender_balance}")
         return
+
+    wallet.updateBalance(senderID, sender_balance-amount)
+    wallet.updateBalance(recipientID, wallet.getBalance(recipientID)+amount)
 
     transaction = Transaction()
-    transaction.outputs.append({"amount": senderWallet.balance-amount, "address":senderWallet.getPublicKey()})
-    transaction.outputs.append({"amount":amount, "address":recipientWallet.getPublicKey()})
+    transaction.outputs.append({"amount": sender_balance-amount, "address":wallet.getPublicKey(senderID)})
+    transaction.outputs.append({"amount":amount, "address":wallet.getPublicKey(recipientID)})
 
-    senderWallet.balance -= amount
-    recipientWallet.balance += amount
-    sig = signTransaction(transaction, senderWallet)
+    sig = signTransaction(transaction, senderID)
 
     return sig
 
-def signTransaction(transaction, senderWallet):
+def signTransaction(transaction, senderID):
     sig = chainUtil.hash(transaction.outputs)
-    transaction.input = {"timestamp": datetime.now(), "amount": senderWallet.balance, "address": senderWallet.getPublicKey(), "signature": sig}
+    transaction.input = {"timestamp": datetime.now(), "amount": wallet.getBalance(senderID), "address": wallet.getPublicKey(senderID), "signature": sig}
     return transaction
     
 def verifyTransaction(transaction):
