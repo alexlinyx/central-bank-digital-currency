@@ -14,42 +14,42 @@ import blockchain
 
 def init(n):
     # wallets = []
-    # chains = []
+    chains = []
     for i in range(n):
         Wallet(i, balance=1000)
-        Blockchain(i)
-    # return wallets, chains
+    chains.append(Blockchain())
+    return chains
 
-def send(senderID, recipientID, chain_no, amount=1):
+def send(senderID, recipientID, chain, amount=1):
     data = newTransaction(senderID, recipientID, amount)
-    addBlock(data, chain_no)
+    chain.addBlock(data)
 
 def test1(n):
-    init(10)
+    chains = init(10)
 
     threads = []
     for _ in range(n):
-        i, j, k = randint(0,9), randint(0,9), randint(0,9)
-        threads.append(Thread(target=send, args=(i,j,k,1)))
+        i, j = randint(0,9), randint(0,9)
+        threads.append(Thread(target=send, args=(i,j,chains[0],1)))
     
     for t in threads:
         t.start()
 
 
 def test2(n):
-    init(n)
+    chains = init(n)
     
     threads = []
     for _ in range(10):
-        i, j, k = randint(0,n-1), randint(0,n-1), randint(0,n-1)
-        threads.append(Thread(target=send, args=(i,j,k,1)))
+        i, j = randint(0,n-1), randint(0,n-1)
+        threads.append(Thread(target=send, args=(i,j,chains[0],1)))
     
     for t in threads:
         t.start()
 
 
-f1 = open('output1.txt', 'w')
-f2 = open('output2.txt', 'w')
+f1 = open('output3.txt', 'w')
+f2 = open('output4.txt', 'w')
 
 for i in range(100):
     start = datetime.now()

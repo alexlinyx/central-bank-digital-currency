@@ -6,25 +6,6 @@ import pickle
 import database
 import wallet
 
-
-def cleanup():
-    pass
-
-def get_item():
-    dynamodb = boto3.resource('dynamodb')
-    
-    table = dynamodb.Table('wallets')      
-    
-    resp = table.get_item(
-            region='us-east-1',
-            Key={
-                'address' : 1,
-            }
-        )
-    
-    if 'Item' in resp:
-        print(resp['Item'])
-
 def main():
     try:
         with open('keys.txt') as f:
@@ -68,11 +49,7 @@ def main():
                 'WriteCapacityUnits': 25
             }
         )
-    # table = dynamodb.Table('Wallets')
-    # data = {'Address':0, 'Balance':100}
-    # database.put_item(table, data)
-
-    # wallet.Wallet(1, balance=100)
+    
     
     table = dynamodb.create_table(
         TableName='Chains',
@@ -93,6 +70,13 @@ def main():
             'WriteCapacityUnits': 25
         }
     )
+
+    # table = dynamodb.Table('Wallets')
+    # data = {'Address':0, 'Balance':100}
+    # database.put_item(table, data)
+
+    # wallet.Wallet(1, balance=100)
+
     # table = dynamodb.Table('wallets')    
     # table.put_item(Item={'address':'4', 'amount':50, 'random':pickle.dumps([block.genesis()])})
     # table.update_item(Key={'address':'4'}, UpdateExpression="set amount = :g", 
