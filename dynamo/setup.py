@@ -3,6 +3,8 @@ import json
 from boto3.dynamodb.conditions import Key
 import block
 import pickle
+import database
+import wallet
 
 
 def cleanup():
@@ -46,44 +48,68 @@ def main():
         aws_access_key_id=public_key,
         aws_secret_access_key=private_key,
         )
-    #ddb_exceptions = client.exceptions
 
-    # table = dynamodb.create_table(
-    #         TableName='wallets',
-    #         KeySchema=[
-    #             {
-    #                 'AttributeName': 'address',
-    #                 'KeyType': 'HASH'
-    #             }
-    #         ],
-    #         AttributeDefinitions=[
-    #             {
-    #                 'AttributeName': 'address',
-    #                 'AttributeType': 'S'
-    #             }
-    #         ],
-    #         ProvisionedThroughput={
-    #             'ReadCapacityUnits': 1,
-    #             'WriteCapacityUnits': 1
-    #         }
-    #     )
-    table = dynamodb.Table('wallets')    
-    table.put_item(Item={'address':'4', 'amount':50, 'random':pickle.dumps(block.genesis())})
-    table.update_item(Key={'address':'4'}, UpdateExpression="set amount = :g", 
-            ExpressionAttributeValues={
-                ':g': 60
-            })
-    resp = table.get_item(Key={'address':'4'})
+    table = dynamodb.create_table(
+            TableName='Wallets',
+            KeySchema=[
+                {
+                    'AttributeName': 'Address',
+                    'KeyType': 'HASH'
+                }
+            ],
+            AttributeDefinitions=[
+                {
+                    'AttributeName': 'Address',
+                    'AttributeType': 'N'
+                }
+            ],
+            ProvisionedThroughput={
+                'ReadCapacityUnits': 25,
+                'WriteCapacityUnits': 25
+            }
+        )
+    # table = dynamodb.Table('Wallets')
+    # data = {'Address':0, 'Balance':100}
+    # database.put_item(table, data)
+
+    # wallet.Wallet(1, balance=100)
     
-    if 'Item' in resp:
-        print(resp['Item']['amount'])
+    table = dynamodb.create_table(
+        TableName='Chains',
+        KeySchema=[
+            {
+                'AttributeName': 'Chain_number',
+                'KeyType': 'HASH'
+            }
+        ],
+        AttributeDefinitions=[
+            {
+                'AttributeName': 'Chain_number',
+                'AttributeType': 'N'
+            }
+        ],
+        ProvisionedThroughput={
+            'ReadCapacityUnits': 25,
+            'WriteCapacityUnits': 25
+        }
+    )
+    # table = dynamodb.Table('wallets')    
+    # table.put_item(Item={'address':'4', 'amount':50, 'random':pickle.dumps([block.genesis()])})
+    # table.update_item(Key={'address':'4'}, UpdateExpression="set amount = :g", 
+    #         ExpressionAttributeValues={
+    #             ':g': 60
+    #         })
+    # resp = table.get_item(Key={'address':'4'})
+    
+    # if 'Item' in resp:
+    #     print(resp['Item']['amount'])
 
-    resp = table.scan(ProjectionExpression="address")
-    for i in resp['Items']:
-        table.delete_item(Key=i)
-    #client.put_item(TableName='wallets', Item={'address':'hi', 'amount':0})
-    #client.update_item(TableName='wallets', Item={'address':{'S':'2'}})
-    #table.delete()
+    # resp = table.scan(ProjectionExpression="address")
+    # for i in resp['Items']:
+    #     table.delete_item(Key=i)
+    # #client.put_item(TableName='wallets', Item={'address':'hi', 'amount':0})
+    # #client.update_item(TableName='wallets', Item={'address':{'S':'2'}})
+    # #table.delete()
     
 
 

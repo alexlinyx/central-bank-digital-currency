@@ -18,6 +18,9 @@ def genPublicKey():
 
 def getPrivateKey(sk):
   return sk.get_verifying_key()
+
+def getPublicKey(sk_string):
+  return SigningKey.from_string(sk_string, curve=SECP256k1)
   
 def sign(sk, data):
   dataHash = hash(data)

@@ -1,48 +1,46 @@
 import boto3
 from boto3.dynamodb.conditions import Key
 
-class Database:
-    def __init__(self) -> None:
-        with open('keys.txt') as f:
-            self.public_key = f.readline().strip()
-            self.private_key = f.readline().strip()
-        
-        self.region = 'us-east-1'
-        self.client = boto3.client(
-            'dynamodb',
-            region_name=self.region,
-            aws_access_key_id=self.public_key,
-            aws_secret_access_key=self.private_key
-            )
+with open('keys.txt') as f:
+    public_key = f.readline().strip()
+    private_key = f.readline().strip()
 
-        self.dynamodb = boto3.resource(
-            'dynamodb',
-            region_name=self.region,
-            aws_access_key_id=self.public_key,
-            aws_secret_access_key=self.private_key,
-            )
+region = 'us-east-1'
+client = boto3.client(
+    'dynamodb',
+    region_name=region,
+    aws_access_key_id=public_key,
+    aws_secret_access_key=private_key
+    )
 
-    def create_table(self, tablename, keyname, capacity=1):
-        table = self.dynamodb.create_table(
-            TableName=tablename,
-            KeySchema=[
-                {
-                    'AttributeName': keyname,
-                    'KeyType': 'HASH'
-                }
-            ],
-            AttributeDefinitions=[
-                {
-                    'AttributeName': keyname,
-                    'AttributeType': 'S'
-                }
-            ],
-            ProvisionedThroughput={
-                'ReadCapacityUnits': capacity,
-                'WriteCapacityUnits': capacity
+dynamodb = boto3.resource(
+    'dynamodb',
+    region_name=region,
+    aws_access_key_id=public_key,
+    aws_secret_access_key=private_key,
+    )
+
+def create_table(self, tablename, keyname, capacity=1):
+    table = dynamodb.create_table(
+        TableName=tablename,
+        KeySchema=[
+            {
+                'AttributeName': keyname,
+                'KeyType': 'HASH'
             }
-        )
-        return table
+        ],
+        AttributeDefinitions=[
+            {
+                'AttributeName': keyname,
+                'AttributeType': 'S'
+            }
+        ],
+        ProvisionedThroughput={
+            'ReadCapacityUnits': capacity,
+            'WriteCapacityUnits': capacity
+        }
+    )
+    return table
 
 def get_item(table, key):
     resp = table.get_item(Key=key)

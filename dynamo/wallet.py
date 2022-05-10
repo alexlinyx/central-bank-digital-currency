@@ -1,7 +1,7 @@
+from itertools import chain
 import chainUtil
 from datetime import datetime
 import database
-import pickle
 import boto3
 from boto3.dynamodb.conditions import Key
 
@@ -10,12 +10,6 @@ with open('keys.txt') as f:
     private_key = f.readline().strip()
 
 region = 'us-east-1'
-client = boto3.client(
-    'dynamodb',
-    region_name=region,
-    aws_access_key_id=public_key,
-    aws_secret_access_key=private_key
-    )
 
 dynamodb = boto3.resource(
     'dynamodb',
@@ -31,22 +25,25 @@ class Wallet:
     self.privateKey = chainUtil.getPrivateKey(self.publicKey)
     self.id = id
 
-    data = {'Address':id, 'Balance':balance, 'Public Key':self.publicKey, 'NFTs': [], 'COVID Pass': False}
+    #print(type(self.publicKey.to_string()))
+    data = {'Address':id, 'Balance':balance, 'Public_Key':self.publicKey.to_string()}
     database.put_item(table, data)
 
 def sign(key, data):
   return chainUtil.sign(key, data)
 
 def getPublicKey(id):
-  resp = database.get_item(table, id)
+  resp = database.get_item(table, {'Address':id})
   if resp:
-    return resp['Public Key']
+    sk_string = bytes(resp['Public_Key'])
+    #print(type(sk_string))
+    return chainUtil.getPublicKey(sk_string)
 
 def getBalance(id):
-  resp = database.get_item(table, id)
+  resp = database.get_item(table, {'Address':id})
   if resp:
     return resp['Balance']
 
 def updateBalance(id, amount):
-  database.put_item(table, {"address":id}, "Balance", amount)
+  database.update_item(table, {"Address":id}, "Balance", amount)
 
