@@ -10,13 +10,12 @@ sendMoney_api = 'https://358i06flg5.execute-api.us-east-1.amazonaws.com/default'
 viewChain_api = 'https://xy1vih4cbh.execute-api.us-east-1.amazonaws.com/default'
 viewWallet_api = 'https://eobf9rg9jj.execute-api.us-east-1.amazonaws.com/default'
 generatePass_api = 'https://6f1a4clya8.execute-api.us-east-1.amazonaws.com/default'
+viewChainSorted_api = 'https://yij2vr62j7.execute-api.us-east-1.amazonaws.com/default'
 
 ID = ""
 
 def message(response):
     if response.status_code==200:
-        print(response.status_code)
-        print('Success')
         return True
     else:
         print(response.text)
@@ -42,21 +41,37 @@ def setup():
     
 def vaccinate(key):
     data = {'key':key, 'wallet':ID}
-    response = requests.post(viewWallet_api, data = json.dumps(data))
-    print(response.text)
+    response = requests.post(generatePass_api, data = json.dumps(data))
+    if message(response):
+        print(json.loads(response.text)['body'])
 
 def viewWallet():
     data = {'wallet':ID}
     response = requests.post(viewWallet_api, data = json.dumps(data))
     if message(response):
         ret = json.loads(response.text)['body']
-        print(ret)
+        printDict(ret)
+
+def printDict(d):
+    for k,v in d.items():
+        print(f"{k}: {v}")
+    print()
+
 
 def viewChain():
     response = requests.get(viewChain_api)
     if message(response):
         ret = json.loads(response.text)['body']
-        print(ret)
+        for transaction in ret:
+            printDict(transaction)
+
+def viewChainSorted(chain_no):
+    data = {'chain':chain_no}
+    response = requests.post(viewChainSorted_api, data = json.dumps(data))
+    if message(response):
+        ret = json.loads(response.text)['body']
+        for chain in ret:
+            printDict(chain)
 
 def send(receiverID, amount, chain):
     data = {"senderID": ID, "receiverID": receiverID, "amount": amount, "number": chain}
@@ -76,12 +91,21 @@ def prompt():
             chain = int(input("Chain number: ").strip())
             send(address, amount, chain)
         except:
-            print("Invalid inputs")
+            print("Invalid input(s)")
         
     elif ip=='wallet':
         viewWallet()
-    elif ip=='chain':
+    elif ip=='table':
         viewChain()
+    elif ip=='vaccinate':
+        key = input("Verify key for Covid pass: ")
+        vaccinate(key)
+    elif ip=='chain':
+        try:
+            chain_no = int(input("Enter chain number: "))
+            viewChainSorted(chain_no)
+        except:
+            print("Invalid input(s)")
     else:
         print('Invalid command')
     return False
