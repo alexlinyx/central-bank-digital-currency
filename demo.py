@@ -9,11 +9,13 @@ makeWallet_api = 'https://k5tus24a63.execute-api.us-east-1.amazonaws.com/default
 sendMoney_api = 'https://358i06flg5.execute-api.us-east-1.amazonaws.com/default'
 viewChain_api = 'https://xy1vih4cbh.execute-api.us-east-1.amazonaws.com/default'
 viewWallet_api = 'https://eobf9rg9jj.execute-api.us-east-1.amazonaws.com/default'
+generatePass_api = 'https://6f1a4clya8.execute-api.us-east-1.amazonaws.com/default'
 
 ID = ""
 
 def message(response):
     if response.status_code==200:
+        print(response.status_code)
         print('Success')
         return True
     else:
@@ -26,7 +28,7 @@ def setup():
     init_balance = input("Initial Deposit: ")
     while True:
         try: 
-            int(init_balance.strip())
+            init_balance = int(init_balance.strip())
             break
         except:
             init_balance = input("\nInitial Deposit: ")
@@ -35,18 +37,20 @@ def setup():
     data = {'name':name, 'balance':init_balance, 'key':(publicKey.to_string()).hex()}
     response = requests.post(makeWallet_api, data = json.dumps(data))
     ID = json.loads(response.text)['body']
-    print(type(ID))
     print("Wallet ID: " + ID)
     message(response)
     
+def vaccinate(key):
+    data = {'key':key, 'wallet':ID}
+    response = requests.post(viewWallet_api, data = json.dumps(data))
+    print(response.text)
 
 def viewWallet():
-    data = {'id':ID}
+    data = {'wallet':ID}
     response = requests.post(viewWallet_api, data = json.dumps(data))
     if message(response):
         ret = json.loads(response.text)['body']
         print(ret)
-
 
 def viewChain():
     response = requests.get(viewChain_api)
@@ -58,17 +62,22 @@ def send(receiverID, amount, chain):
     data = {"senderID": ID, "receiverID": receiverID, "amount": amount, "number": chain}
     response = requests.post(sendMoney_api, data = json.dumps(data))
     if message(response):
-        print("Transaction hash: " + json.loads(response.text)['body'])
+        ret = json.loads(response.text)['body']
+        print("Transaction hash: " + ret)
 
 def prompt():
     ip = input("What would you like to do?\n").strip()
     if ip=='quit':
         return True
     elif ip=='send':
-        address = input("Receiving address: ")
-        amount = input("Amount: ")
-        chain = input("Chain number:")
-        send(address, amount, chain)
+        try:
+            address = input("Receiving address: ").strip()
+            amount = int(input("Amount: ").strip())
+            chain = int(input("Chain number: ").strip())
+            send(address, amount, chain)
+        except:
+            print("Invalid inputs")
+        
     elif ip=='wallet':
         viewWallet()
     elif ip=='chain':
